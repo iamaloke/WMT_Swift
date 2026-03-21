@@ -9,6 +9,9 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="LoginVC" customModule="WMT_Swift" customModuleProvider="target">
             <connections>
+                <outlet property="emailTF" destination="B7Z-BP-BJP" id="qbI-uK-JR4"/>
+                <outlet property="loginBTN" destination="tbp-yv-XQ4" id="Q0J-bG-Qka"/>
+                <outlet property="passwordTF" destination="yU8-Cf-wSd" id="pm2-03-oFT"/>
                 <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
             </connections>
         </placeholder>
@@ -66,7 +69,10 @@
                                 <constraint firstAttribute="height" constant="44" id="cwW-4M-WFy"/>
                             </constraints>
                             <state key="normal" title="Button"/>
-                            <buttonConfiguration key="configuration" style="filled" title="Submit"/>
+                            <buttonConfiguration key="configuration" style="filled" title="Login"/>
+                            <connections>
+                                <action selector="didTapOnLogin:" destination="-1" eventType="touchUpInside" id="80J-ug-vGm"/>
+                            </connections>
                         </button>
                     </subviews>
                 </stackView>

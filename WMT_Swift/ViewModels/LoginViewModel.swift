@@ -14,7 +14,15 @@ final class LoginViewModel {
     var onSuccess: ((String) -> Void)?
     var onError: ((String) -> Void)?
     
+    // MARK: - Network Manager
+    var networkManager: APIService
+    
+    init(apiService: APIService) {
+        self.networkManager = apiService
+    }
+    
     func validate(_ email: String?, _ password: String?) -> Bool {
+        return true
         guard let email = email, !email.isEmpty else {
             onError?("Email is required")
             return false
@@ -39,7 +47,35 @@ final class LoginViewModel {
         return emailPredicate.evaluate(with: email)
     }
     
-    func login(email: String, password: String) {
+    func login(email: String?, password: String?) async {
+        guard let email, let password, validate(email, password) else {
+            return
+        }
         
+        onLoading?(true)
+        defer { onLoading?(false) }
+        
+        do {
+            let data = try JSONEncoder().encode(LoginRequest(email: "eve.holt@reqres.in", password: "cityslicka"))
+            let endpoint = Endpoint<LoginResponse>(path: Network.URL.login.rawValue, method: .post, headers: [:], body: data)
+            let response = try await networkManager.request(endpoint)
+            print("response: \(response)")
+            onSuccess?("Success")
+        } catch let error as APPError {
+            handleError(error)
+        } catch {
+            onError?("Something went wrong. Please try again.")
+        }
+    }
+    
+    private func handleError(_ error: APPError) {
+        switch error {
+        case .invalidResponse:
+            onError?("Invalid server response")
+        case .noData:
+            onError?("No data received")
+        case .decodingError:
+            onError?("Failed to process data")
+        }
     }
 }

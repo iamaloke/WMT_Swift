@@ -9,7 +9,7 @@ import UIKit
 
 class LoginVC: UIViewController {
     
-    private let viewModel = LoginViewModel()
+    private let viewModel = LoginViewModel(apiService: NetworkManager())
 
     @IBOutlet private weak var emailTF: UITextField!
     @IBOutlet private weak var passwordTF: UITextField!
@@ -17,13 +17,26 @@ class LoginVC: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        emailTF.delegate = self
-        passwordTF.delegate = self
-        loginBTN.isEnabled = false
+        setup()
         bindViewModel()
     }
 
     @IBAction private func didTapOnLogin(_ sender: UIButton) {
+        sender.isEnabled = false
+        
+        Task { [weak self] in
+            guard let self else { return }
+            await self.viewModel.login(email: emailTF.text, password: passwordTF.text)
+            sender.isEnabled = true
+        }
+    }
+    
+    private func setup() {
+        emailTF.delegate = self
+        emailTF.addTarget(self, action: #selector(textInputChanged(_:)), for: .editingChanged)
+        passwordTF.delegate = self
+        passwordTF.addTarget(self, action: #selector(textInputChanged(_:)), for: .editingChanged)
+        loginBTN.isEnabled = false
     }
     
     private func bindViewModel() {
@@ -50,7 +63,7 @@ extension LoginVC: UITextFieldDelegate {
         return true
     }
     
-    func textFieldDidEndEditing(_ textField: UITextField) {
+    @objc func textInputChanged(_ textField: UITextField) {
         loginBTN.isEnabled = viewModel.validate(emailTF.text, passwordTF.text)
     }
 }

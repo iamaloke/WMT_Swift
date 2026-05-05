@@ -7,9 +7,16 @@
 
 import Foundation
 
+enum LoadingState {
+    case idle
+    case loading(message: String)
+    case finished
+}
+
 final class LoginViewModel {
     
     // MARK: - Bindings (Outputs)
+    var onLoadingStateChange: ((LoadingState) -> Void)?
     var onLoading: ((Bool) -> Void)?
     var onSuccess: ((String) -> Void)?
     var onError: ((String) -> Void)?
@@ -22,7 +29,6 @@ final class LoginViewModel {
     }
     
     func validate(_ email: String?, _ password: String?) -> Bool {
-        return true
         guard let email = email, !email.isEmpty else {
             onError?("Email is required")
             return false
@@ -52,12 +58,15 @@ final class LoginViewModel {
             return
         }
         
-        onLoading?(true)
-        defer { onLoading?(false) }
+        onLoadingStateChange?(.loading(message: "Logging in..."))
+        defer {
+            onLoadingStateChange?(.finished)
+            onLoadingStateChange?(.idle)
+        }
         
         do {
             let data = try JSONEncoder().encode(LoginRequest(email: "eve.holt@reqres.in", password: "cityslicka"))
-            let endpoint = Endpoint<LoginResponse>(path: Network.URL.login.rawValue, method: .post, headers: [:], body: data)
+            let endpoint = Endpoint<LoginResponse>(path: Network.URL.login.rawValue, method: .post, headers: ["x-api-key": Constants.reqresApiKey], body: data)
             let response = try await networkManager.request(endpoint)
             print("response: \(response)")
             onSuccess?("Success")

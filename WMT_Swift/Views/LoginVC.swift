@@ -40,19 +40,32 @@ class LoginVC: UIViewController {
     }
     
     private func bindViewModel() {
-        viewModel.onLoading = { isLoading in
-            print("Loading: \(isLoading)")
-            // show/hide loader
-        }
+//        viewModel.onLoading = { isLoading in
+//            print("Loading: \(isLoading)")
+//            // show/hide loader
+//        }
+//
+//        viewModel.onSuccess = { token in
+//            print("Login success: \(token)")
+//            // navigate to next screen
+//        }
+//
+//        viewModel.onError = { message in
+//            print("Error: \(message)")
+//            // show alert
+//        }
         
-        viewModel.onSuccess = { token in
-            print("Login success: \(token)")
-            // navigate to next screen
-        }
-        
-        viewModel.onError = { message in
-            print("Error: \(message)")
-            // show alert
+        viewModel.onLoadingStateChange = { [weak self] state in
+            guard let self = self else { return }
+            
+            switch state {
+            case .idle:
+                break
+            case .loading(let message):
+                self.showActivity(message: message)
+            case .finished:
+                self.hideActivity()
+            }
         }
     }
     
@@ -67,3 +80,5 @@ extension LoginVC: UITextFieldDelegate {
         loginBTN.isEnabled = viewModel.validate(emailTF.text, passwordTF.text)
     }
 }
+
+extension LoginVC: ActivityIndicatable {}

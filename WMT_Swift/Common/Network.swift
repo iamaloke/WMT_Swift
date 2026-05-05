@@ -38,7 +38,6 @@ struct Endpoint<T: Decodable> {
     var urlRequest: URLRequest {
         var allHeaders = headers ?? [:]
         allHeaders["Content-Type"] = "application/json"
-        allHeaders["x-api-key"] = Constants.reqresApiKey
         
         var request = URLRequest(url: URL(string: path)!)
         request.httpMethod = method.rawValue
